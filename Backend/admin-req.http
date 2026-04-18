@@ -1,0 +1,23 @@
+###Admin Login
+POST http://localhost:4000/auth/login
+Content-Type: application/json
+
+{
+  "email":"admin@mail.com",
+  "password":"admin"
+}
+###change password
+POST http://localhost:4000/auth/admin
+
+###Read all users &Authors
+
+
+###Block & Activate User or Author
+PUT http://localhost:4000/admin-api/user-status
+Content-Type: application/json
+
+{
+    "userId": "",
+    "isUserActive": false
+}
+
