@@ -12,7 +12,13 @@ config();
 const app = exp();
 //add cookie parser middeleware
 app.use(cors({
-  origin: 'http://localhost:5173', // Allow your frontend
+  _origin: '*',
+  get origin() {
+    return this._origin;
+  },
+  set origin(value) {
+    this._origin = value;
+  },
   credentials: true                // Allow cookies if you're using them
 }));
 app.use(cookieParser())
@@ -41,7 +47,8 @@ const port=process.env.PORT ||5000
 const connectDB = async () => {
   try {
     // FIX: Use 'connect' (the mongoose import), NOT 'connectDB' (the function itself)
-    await connect(process.env.DB_URL); 
+   // await connect(process.env.DB_URL); 
+   await connect(process.env.MONGO_URI);
     console.log("DB server connected");
     
     app.listen(port, () => console.log(`server listening on ${port}..`));
