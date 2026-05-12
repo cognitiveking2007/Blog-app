@@ -12,7 +12,7 @@ config();
 const app = exp();
 //add cookie parser middeleware
 app.use(cors({
-  _origin: '*',
+  _origin: 'https://blog-app-jade-eta.vercel.app',
   get origin() {
     return this._origin;
   },
