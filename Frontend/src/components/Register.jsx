@@ -16,34 +16,37 @@ import { useState } from "react";
 import axios from "axios";
 
 function Register() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
-  const [loading, setLoading] = useState(false);
-  const [apiError, setApiError] = useState(null);
+ // 1. First, make sure you initialize navigate at the top of your component
+const navigate = useNavigate(); 
 
-  //When user registration submitted
-  const onUserRegister = async (userObj) => {
-    console.log(userObj);
-    try {
-        //start loading
-        setLoading(true)
-        //make HTTp Post req to create User in backend
-        let res=await axios.post(
-        )
-        if(res.status===201){
-            //navigate to Login
-            navigate("/login");
-        }
-    } catch (err) {
-      console.log("err in registration", err);
-      setApiError(err.response?.data?.error || "Registration failed");
-    } finally {
-      setLoading(false);
+// 2. Update the onUserRegister function
+const onUserRegister = async (userObj) => {
+  console.log("Submitting:", userObj);
+  try {
+    setLoading(true);
+    setApiError(null);
+
+    // Determine the correct endpoint based on the selected role
+    // If role is 'USER', path is 'user-api/user'. If 'AUTHOR', path is 'author-api/author'
+    const endpoint = userObj.role === "USER" 
+      ? "https://onrender.com" 
+      : "https://onrender.com";
+
+    // Make the POST request with the URL and the data (userObj)
+    let res = await axios.post(endpoint, userObj);
+
+    if (res.status === 201 || res.data.message === "User created" || res.data.message === "Author created") {
+      // Navigate to Login page on success
+      navigate("/login");
     }
-  };
+  } catch (err) {
+    console.log("err in registration", err);
+    // Capture error message from backend if available
+    setApiError(err.response?.data?.message || "Registration failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className={`${pageBackground} flex items-center justify-center py-16 px-4`}>
