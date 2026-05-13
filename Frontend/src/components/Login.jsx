@@ -15,7 +15,7 @@ import {
 import { NavLink, useNavigate, useLocation } from "react-router";
 import { useAuth } from "../store/authStore";
 import { useEffect } from "react";
-import {toast} from 'react-hot-toast'
+import { toast } from "react-hot-toast";
 
 function Login() {
   const {
@@ -26,7 +26,9 @@ function Login() {
 
   const navigate = useNavigate();
   //get state from auth store
-  const { login, currentUser, loading, error, isAuthenticated } = useAuth();
+  const { login, currentUser, loading, error, isAuthenticated } = useAuth(
+    (state) => state,
+  );
   //on user login
   const onUserLogin = (userCredObj) => {
     //call login() of auth store
@@ -34,38 +36,29 @@ function Login() {
   };
 
   useEffect(() => {
-    //navigation logic
-   /* if (isAuthenticated === true) {
-      if (currentUser.role === "USER") {
-        //show cuccess toast
-        toast.success("Login success and redirecting to User Profile",{duration:2000})
-        navigate("/user-profile");
-      }
-      if (currentUser.role === "AUTHOR") {
-         toast.success("Login success and redirecting to Author Profile",{duration:2000})
-        navigate("/author-profile");
-      }
-      if (currentUser.role === "ADMIN") {
-         toast.success("Login success and redirecting to Admin Profile",{duration:2000})
-        navigate("/admin-profile");
-      }
+    if (!isAuthenticated || !currentUser?.role) {
+      return;
     }
-  }, [isAuthenticated]);*/
-  if (isAuthenticated && currentUser?.role) { // Use optional chaining
-    const rolePaths = {
-      USER: "/user-profile",
-      AUTHOR: "/author-profile",
-      ADMIN: "/admin-profile",
-    };
 
-    const targetPath = rolePaths[currentUser.role];
-    
-    if (targetPath) {
-      toast.success(`Login success! Redirecting to ${currentUser.role} Profile`, { duration: 2000 });
-      navigate(targetPath);
+    if (currentUser.role === "USER") {
+      toast.success("User Login succes and redirecting to User profile", {
+        duration: 2000,
+      });
+      navigate("/user-profile");
     }
-  }
-}, [isAuthenticated, currentUser, navigate]);
+    if (currentUser.role === "AUTHOR") {
+      toast.success("Author Login succes and Author redirecting to profile", {
+        duration: 2000,
+      });
+      navigate("/author-profile");
+    }
+    if (currentUser.role === "ADMIN") {
+      toast.success("Admin Login succes and Admin redirecting to profile", {
+        duration: 2000,
+      });
+      navigate("/admin-profile");
+    }
+  }, [currentUser, isAuthenticated, navigate]);
 
   //deal with loading
   if (loading) {
@@ -73,7 +66,9 @@ function Login() {
   }
 
   return (
-    <div className={`${pageBackground} flex items-center justify-center py-16 px-4`}>
+    <div
+      className={`${pageBackground} flex items-center justify-center py-16 px-4`}
+    >
       <div className={formCard}>
         {/* Title */}
         <h2 className={formTitle}>Sign In</h2>
@@ -92,10 +87,13 @@ function Login() {
               {...register("email", {
                 required: "Email is required",
 
-                validate: (value) => value.trim().length > 0 || "Email cannot be empty",
+                validate: (value) =>
+                  value.trim().length > 0 || "Email cannot be empty",
               })}
             />
-            {errors.email && <p className={errorClass}>{errors.email.message}</p>}
+            {errors.email && (
+              <p className={errorClass}>{errors.email.message}</p>
+            )}
           </div>
 
           {/* Password */}
@@ -107,10 +105,13 @@ function Login() {
               className={inputClass}
               {...register("password", {
                 required: "Password is required",
-                validate: (value) => value.trim().length > 0 || "Password cannot be empty",
+                validate: (value) =>
+                  value.trim().length > 0 || "Password cannot be empty",
               })}
             />
-            {errors.password && <p className={errorClass}>{errors.password.message}</p>}
+            {errors.password && (
+              <p className={errorClass}>{errors.password.message}</p>
+            )}
           </div>
 
           {/* Forgot password */}

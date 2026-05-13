@@ -8,53 +8,73 @@ import {
   labelClass,
   pageBackground,
   submitBtn,
-  mutedText,
-} from "../styles/common";
-import { useForm } from "react-hook-form";
-import { NavLink,useNavigate } from "react-router";
-import { useState } from "react";
-import axios from "axios";
+  mutedText
+} from '../styles/common'
+import { useForm } from 'react-hook-form'
+import { NavLink, useNavigate } from 'react-router'
+import { useState } from 'react'
+import axios from 'axios'
+import BASE_URL from '../config'
 
 function Register() {
- // 1. First, make sure you initialize navigate at the top of your component
-const navigate = useNavigate(); 
+  const navigate = useNavigate()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm()
+  const [loading, setLoading] = useState(false)
+  const [apiError, setApiError] = useState(null)
+  const [preview, setPreview] = useState(null)
 
-// 2. Update the onUserRegister function
-const onUserRegister = async (userObj) => {
-  console.log("Submitting:", userObj);
-  try {
-    setLoading(true);
-    setApiError(null);
-
-    // Determine the correct endpoint based on the selected role
-    // If role is 'USER', path is 'user-api/user'. If 'AUTHOR', path is 'author-api/author'
-    const endpoint = userObj.role === "USER" 
-      ? "https://onrender.com" 
-      : "https://onrender.com";
-
-    // Make the POST request with the URL and the data (userObj)
-    let res = await axios.post(endpoint, userObj);
-
-    if (res.status === 201 || res.data.message === "User created" || res.data.message === "Author created") {
-      // Navigate to Login page on success
-      navigate("/login");
+  //When user registration submitted
+  const onUserRegister = async (userObj) => {
+    console.log(userObj)
+    //file + userObj ---> FormData
+    //create FormData object
+    const formData = new FormData()
+    //add all user properties and file to this formData Object
+    formData.append('firstName', userObj.firstName)
+    formData.append('lastName', userObj.lastName)
+    formData.append('email', userObj.email)
+    formData.append('password', userObj.password)
+    formData.append('role', userObj.role)
+    //Append if image is exists
+    if (userObj.profileImageUrl?.[0]) {
+      formData.append('profileImageUrl', userObj.profileImageUrl[0])
     }
-  } catch (err) {
-    console.log("err in registration", err);
-    // Capture error message from backend if available
-    setApiError(err.response?.data?.message || "Registration failed");
-  } finally {
-    setLoading(false);
+    try {
+      setLoading(true)
+      const res = await axios.post(
+        `${BASE_URL}/auth/users`,
+        formData,
+        { withCredentials: true }
+      )
+      if (res.status === 201) {
+        navigate('/login')
+      }
+    } catch (err) {
+      console.log('err in registration', err)
+      setApiError(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          err.message ||
+          'Registration failed'
+      )
+    } finally {
+      setLoading(false)
+    }
   }
-};
 
   return (
-    <div className={`${pageBackground} flex items-center justify-center py-16 px-4`}>
+    <div
+      className={`${pageBackground} flex items-center justify-center py-16 px-4`}
+    >
       <div className={formCard}>
         <h2 className={formTitle}>Create an Account</h2>
 
         {/* API Error */}
-        {/* {apiError && <p className={errorClass}>{apiError}</p>} */}
+        {apiError && <p className={errorClass}>{apiError}</p>}
 
         <form onSubmit={handleSubmit(onUserRegister)}>
           {/* ROLE */}
@@ -66,8 +86,8 @@ const onUserRegister = async (userObj) => {
                 <input
                   type="radio"
                   value="USER"
-                  {...register("role", {
-                    required: "Please select a role",
+                  {...register('role', {
+                    required: 'Please select a role'
                   })}
                   className="accent-blue-600 w-4 h-4"
                 />
@@ -78,8 +98,8 @@ const onUserRegister = async (userObj) => {
                 <input
                   type="radio"
                   value="AUTHOR"
-                  {...register("role", {
-                    required: "Please select a role",
+                  {...register('role', {
+                    required: 'Please select a role'
                   })}
                   className="accent-blue-600 w-4 h-4"
                 />
@@ -100,20 +120,22 @@ const onUserRegister = async (userObj) => {
                 type="text"
                 className={inputClass}
                 placeholder="First name"
-                {...register("firstName", {
-                  required: "First name is required",
+                {...register('firstName', {
+                  required: 'First name is required',
                   minLength: {
                     value: 2,
-                    message: "At least 2 characters required",
+                    message: 'At least 2 characters required'
                   },
                   maxLength: {
                     value: 30,
-                    message: "Max 30 characters allowed",
+                    message: 'Max 30 characters allowed'
                   },
-                  validate: (v) => v.trim().length > 0 || "Cannot be empty",
+                  validate: (v) => v.trim().length > 0 || 'Cannot be empty'
                 })}
               />
-              {errors.firstName && <p className={errorClass}>{errors.firstName.message}</p>}
+              {errors.firstName && (
+                <p className={errorClass}>{errors.firstName.message}</p>
+              )}
             </div>
 
             <div className="flex-1">
@@ -122,14 +144,16 @@ const onUserRegister = async (userObj) => {
                 type="text"
                 className={inputClass}
                 placeholder="Last name"
-                {...register("lastName", {
+                {...register('lastName', {
                   maxLength: {
                     value: 30,
-                    message: "Max 30 characters allowed",
-                  },
+                    message: 'Max 30 characters allowed'
+                  }
                 })}
               />
-              {errors.lastName && <p className={errorClass}>{errors.lastName.message}</p>}
+              {errors.lastName && (
+                <p className={errorClass}>{errors.lastName.message}</p>
+              )}
             </div>
           </div>
 
@@ -140,12 +164,13 @@ const onUserRegister = async (userObj) => {
               type="email"
               className={inputClass}
               placeholder="you@example.com"
-              {...register("email", {
-                required: "Email is required",
-                required: [true, "Password is required"],
+              {...register('email', {
+                required: 'Email is required'
               })}
             />
-            {errors.email && <p className={errorClass}>{errors.email.message}</p>}
+            {errors.email && (
+              <p className={errorClass}>{errors.email.message}</p>
+            )}
           </div>
 
           {/* PASSWORD */}
@@ -155,20 +180,59 @@ const onUserRegister = async (userObj) => {
               type="password"
               className={inputClass}
               placeholder="Min. 8 characters"
-              {...register("password", {
-                required: "Password is required",
+              {...register('password', {
+                required: 'Password is required'
               })}
             />
-            {errors.password && <p className={errorClass}>{errors.password.message}</p>}
+            {errors.password && (
+              <p className={errorClass}>{errors.password.message}</p>
+            )}
           </div>
 
           {/* PROFILE IMAGE */}
           <div className={formGroup}>
             <label className={labelClass}>Profile Image</label>
 
-            <input type="text" accept="image/png, image/jpeg" {...register("profileImageUrl")} />
+            <input
+              type="file"
+              className={inputClass}
+              accept="image/png,image/jpeg"
+              {...register('profileImageUrl', {
+                validate: {
+                  fileType: (files) => {
+                    if (!files?.[0]) return true
+                    return (
+                      ['image/png', 'image/jpeg'].includes(files[0].type) ||
+                      'Only JPG/PNG allowed'
+                    )
+                  },
+                  fileSize: (files) => {
+                    if (!files?.[0]) return true
+                    return files[0].size <= 2 * 1024 * 1024 || 'Max size 2MB'
+                  }
+                }
+              })}
+              onChange={(event) => {
+                const file = event.target.files[0]
+                if (file) {
+                  setPreview(URL.createObjectURL(file))
+                }
+              }}
+            />
 
-            {errors.profileImageUrl && <p className={errorClass}>{errors.profileImageUrl.message}</p>}
+            {errors.profileImageUrl && (
+              <p className={errorClass}>{errors.profileImageUrl.message}</p>
+            )}
+            {/* Image preview */}
+            {preview && (
+              <div className="mt-3 flex justify-center">
+                <img
+                  src={preview}
+                  alt=""
+                  className="w-24 h-24 overflow-hidden rounded-full ring-2"
+                />
+              </div>
+            )}
           </div>
 
           {/* SUBMIT */}
@@ -179,14 +243,14 @@ const onUserRegister = async (userObj) => {
 
         {/* FOOTER */}
         <p className={`${mutedText} text-center mt-5`}>
-          Already have an account?{" "}
+          Already have an account?{' '}
           <NavLink to="/login" className="text-[#0066cc] font-medium">
             Sign in
           </NavLink>
         </p>
       </div>
     </div>
-  );
+  )
 }
 
-export default Register;
+export default Register

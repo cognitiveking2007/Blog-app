@@ -8,11 +8,9 @@ function AuthorProfile() {
   const logout = useAuth((state) => state.logout);
   const navigate = useNavigate();
 
-  //call t6his function on logout
   const onLogout = async () => {
-    //call login route
     await logout();
-    //navigate to login component
+
     navigate("/login");
   };
 
@@ -38,7 +36,9 @@ function AuthorProfile() {
           {/* Name */}
           <div>
             <p className="text-sm text-[#6e6e73]">Welcome back</p>
-            <h2 className="text-xl font-semibold text-[#1d1d1f]">{currentUser?.firstName}</h2>
+            <h2 className="text-xl font-semibold text-[#1d1d1f]">
+              {currentUser?.firstName}
+            </h2>
           </div>
         </div>
 

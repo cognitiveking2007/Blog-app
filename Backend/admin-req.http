@@ -1,23 +1,26 @@
-###Admin Login
+### Admin Login
 POST http://localhost:4000/auth/login
 Content-Type: application/json
 
 {
-  "email":"admin@mail.com",
-  "password":"admin"
+    "email":"admin@gmail.com",
+    "password":"admin"
 }
-###change password
-POST http://localhost:4000/auth/admin
-
-###Read all users &Authors
 
 
-###Block & Activate User or Author
-PUT http://localhost:4000/admin-api/user-status
+### Admin Logout
+GET http://localhost:4000/auth/logout
+
+
+### Read all articles written by authors
+GET http://localhost:4000/admin-api/articles
+
+
+### Modify user status (enable / disable)
+PUT http://localhost:4000/admin-api/users
 Content-Type: application/json
 
 {
-    "userId": "",
+    "userId":"69b4df2cfcdf7a0bccfc9076",
     "isUserActive": false
 }
-

@@ -1,90 +1,102 @@
-import { useForm } from "react-hook-form";
-import { useAuth } from "../store/authStore";
-import axios from "axios";
-import { toast } from "react-hot-toast";
-import { 
-  formCard, formTitle, formGroup, labelClass, 
-  inputClass, submitBtn, errorClass, pageBackground 
-} from "../styles/common";
+import { useEffect, useState } from 'react'
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../store/authStore'
+import BASE_URL from '../config'
+import {
+  pageWrapper,
+  articleGrid,
+  articleCardClass,
+  articleTitle,
+  tagClass,
+  ghostBtn,
+  timestampClass,
+  loadingClass,
+  errorClass,
+  emptyStateClass
+} from '../styles/common'
 
 function Articles() {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm();
-  const { currentUser } = useAuth();
+  const navigate = useNavigate()
+  const user = useAuth((state) => state.currentUser)
 
-  const onArticleSubmit = async (articleData) => {
-    try {
-      // Attach author details from current user state
-      const payload = {
-        ...articleData,
-        author: currentUser.username,
-        email: currentUser.email,
-        date: new Date().toLocaleDateString()
-      };
+  const [articles, setArticles] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
 
-      // Ensure this URL matches your backend route in server.js
-      const res = await axios.post("http://blog-app-4eug.onrender.com/author-api/article", payload, {
-        withCredentials: true
-      });
+  useEffect(() => {
+    if (!user) return
 
-      if (res.status === 201) {
-        toast.success("Article published successfully!");
-        reset(); // Clear form on success
+    const getArticles = async () => {
+      setLoading(true)
+      try {
+        const res = await axios.get(`${BASE_URL}/user-api/articles`, {
+          withCredentials: true
+        })
+        setArticles(res.data.payload || [])
+      } catch (err) {
+        setError(err.response?.data?.message || 'Failed to load articles')
+      } finally {
+        setLoading(false)
       }
-    } catch (err) {
-      console.error("Article upload error:", err);
-      toast.error(err.response?.data?.message || "Failed to publish article");
     }
-  };
+
+    getArticles()
+  }, [user])
+
+  const formatDate = (value) =>
+    new Date(value).toLocaleDateString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      dateStyle: 'medium'
+    })
+
+  const openArticle = (article) => {
+    navigate(`/article/${article._id}`, { state: article })
+  }
+
+  if (loading) return <p className={loadingClass}>Loading articles...</p>
+  if (error) return <p className={errorClass}>{error}</p>
 
   return (
-    <div className={`${pageBackground} min-h-screen py-10 px-4`}>
-      <div className={`${formCard} max-w-3xl mx-auto`}>
-        <h2 className={formTitle}>Create New Article</h2>
-        
-        <form onSubmit={handleSubmit(onArticleSubmit)}>
-          {/* Title */}
-          <div className={formGroup}>
-            <label className={labelClass}>Title</label>
-            <input
-              type="text"
-              className={inputClass}
-              placeholder="Enter article title..."
-              {...register("title", { required: "Title is required" })}
-            />
-            {errors.title && <p className={errorClass}>{errors.title.message}</p>}
-          </div>
+    <div className={pageWrapper}>
+      {articles.length === 0 ? (
+        <p className={emptyStateClass}>No articles available yet.</p>
+      ) : (
+        <div className={articleGrid}>
+          {articles.map((article) => (
+            <div
+              key={article._id}
+              className={`${articleCardClass} flex flex-col gap-2`}
+            >
+              {/* Category */}
+              <p className={tagClass}>{article.category}</p>
 
-          {/* Category */}
-          <div className={formGroup}>
-            <label className={labelClass}>Category</label>
-            <select className={inputClass} {...register("category", { required: "Select a category" })}>
-              <option value="">Select Category</option>
-              <option value="programming">Programming</option>
-              <option value="fashion">Fashion</option>
-              <option value="fitness">Fitness</option>
-            </select>
-            {errors.category && <p className={errorClass}>{errors.category.message}</p>}
-          </div>
+              {/* Title */}
+              <p className={`${articleTitle} line-clamp-2`}>{article.title}</p>
 
-          {/* Content */}
-          <div className={formGroup}>
-            <label className={labelClass}>Content</label>
-            <textarea
-              rows="8"
-              className={inputClass}
-              placeholder="Write your article here..."
-              {...register("content", { required: "Content cannot be empty" })}
-            ></textarea>
-            {errors.content && <p className={errorClass}>{errors.content.message}</p>}
-          </div>
+              {/* Excerpt */}
+              <p className="text-sm text-[#6e6e73] line-clamp-3 break-words">
+                {article.content}
+              </p>
 
-          <button type="submit" className={submitBtn}>
-            Publish Article
-          </button>
-        </form>
-      </div>
+              {/* Footer */}
+              <div className="flex items-center justify-between mt-auto pt-4">
+                <p className={timestampClass}>
+                  {formatDate(article.createdAt)}
+                </p>
+                <button
+                  className={ghostBtn}
+                  onClick={() => openArticle(article)}
+                >
+                  Read →
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
-  );
+  )
 }
 
-export default Articles;
+export default Articles

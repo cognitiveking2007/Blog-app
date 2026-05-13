@@ -30,14 +30,12 @@ function Header() {
   return (
     <nav className={navbarClass}>
       <div className={navContainerClass}>
-
         {/* LOGO */}
         <NavLink to="/" className={navBrandClass}>
           MyBlog
         </NavLink>
 
         <ul className={navLinksClass}>
-
           {/* HOME */}
           <li>
             <NavLink
@@ -91,7 +89,6 @@ function Header() {
               </NavLink>
             </li>
           )}
-
         </ul>
       </div>
     </nav>

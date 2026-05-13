@@ -1,42 +1,46 @@
-import exp from 'express';
-import { UserModel } from '../models/UserModel.js';
-import { ArticleModel } from '../models/ArticleModel.js';
-import { verifyToken } from '../middlewares/VerifyToken.js';
+import exp from 'express'
+import { verifyToken } from '../middlewares/verifyToken.js'
+import { userModel } from '../models/UserModel.js'
+import { articleModel } from '../models/ArticleModel.js'
 
-export const adminApp = exp.Router();
+export const adminApp = exp.Router()
 
-// 1. GET all users (Users and Authors)
-adminApp.get("/users", verifyToken("ADMIN"), async (req, res) => {
-    // Find all users who are NOT admins
-    const usersList = await UserModel.find({ role: { $ne: "ADMIN" } }).select("-password");
-    res.status(200).json({ message: "All users and authors", payload: usersList });
-});
+// Get all users (role: USER)
+adminApp.get('/users', verifyToken('ADMIN'), async (req, res) => {
+  const users = await userModel.find({ role: 'USER' }).select('-password')
+  res.status(200).json({ message: 'Users list', payload: users })
+})
 
-// 2. Block or Unblock a User/Author
-adminApp.put("/user-status", verifyToken("ADMIN"), async (req, res) => {
-    // Get userId and the new status from the body
-    const { userId, isUserActive } = req.body;
+// Get all authors (role: AUTHOR)
+adminApp.get('/authors', verifyToken('ADMIN'), async (req, res) => {
+  const authors = await userModel.find({ role: 'AUTHOR' }).select('-password')
+  res.status(200).json({ message: 'Authors list', payload: authors })
+})
 
-    // Update the users status
-    const updatedUser = await UserModel.findByIdAndUpdate(
-        userId,
-        { isUserActive: isUserActive },
-        { new: true }
-    ).select("-password");
+// Toggle user/author active status
+adminApp.put('/users/:id/status', verifyToken('ADMIN'), async (req, res) => {
+  const { id } = req.params
+  const { isUserActive } = req.body
 
-    if (!updatedUser) {
-        return res.status(404).json({ message: "User not found" });
-    }
+  const user = await userModel.findById(id)
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' })
+  }
 
-    const statusMessage = isUserActive ? "activated" : "blocked";
-    res.status(200).json({ 
-        message: `User has been ${statusMessage} successfully`, 
-        payload: updatedUser 
-    });
-});
+  user.isUserActive = isUserActive
+  await user.save({ validateBeforeSave: false })
 
-// 3. GET all articles (So Admin can monitor content)
-adminApp.get("/articles", verifyToken("ADMIN"), async (req, res) => {
-    const articles = await ArticleModel.find();
-    res.status(200).json({ message: "All articles", payload: articles });
-});
+  const userData = user.toObject()
+  delete userData.password
+
+  res.status(200).json({
+    message: 'User status updated successfully',
+    payload: userData
+  })
+})
+
+// Read articles of all authors
+adminApp.get('/articles', verifyToken('ADMIN'), async (req, res) => {
+  const articlesList = await articleModel.find({ isActive: true })
+  res.status(200).json({ message: 'Article List:', payload: articlesList })
+})

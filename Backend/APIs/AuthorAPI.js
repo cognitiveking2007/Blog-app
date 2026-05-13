@@ -1,79 +1,84 @@
 import exp from "express";
-import { UserModel } from "../models/UserModel.js";
-import { ArticleModel } from "../models/ArticleModel.js";
-import { verifyToken } from "../middlewares/VerifyToken.js";
+import { userModel } from "../models/UserModel.js";
+import { articleModel } from "../models/ArticleModel.js";
+import { verifyToken } from "../middlewares/verifyToken.js";
 export const authorApp = exp.Router();
 
-//Write article (protected route)
-authorApp.post("/article", verifyToken("AUTHOR"), async (req, res) => {
+//Write Article
+authorApp.post("/articles", verifyToken("AUTHOR"), async (req, res) => {
   //get articleObj from client
   const articleObj = req.body;
   //get user from decoded token
-  //console.log(req.user);
   let user = req.user;
   //check author
-  let author = await UserModel.findById(articleObj.author);
-  //cross check emails
-  if (author.email != user.email) {
+  const author = await userModel.findById(articleObj.author);
+  if (author.email !== user.email) {
     return res.status(403).json({ message: "You are not authorized" });
   }
   if (!author) {
     return res.status(404).json({ message: "Invalid author" });
   }
-
-  //create article Document
-  const articleDoc = new ArticleModel(articleObj);
+  //create article document
+  const articleDocument = new articleModel(articleObj);
   //save
-  await articleDoc.save();
+  await articleDocument.save();
   //send res
   res.status(201).json({ message: "Article published successfully" });
 });
 
-//Read own articles
+//Read own Articles
 authorApp.get("/articles", verifyToken("AUTHOR"), async (req, res) => {
-  //rget author id from decoded token
+  //get the user from req token
   const authorIdOfToken = req.user?.id;
-  //get artcles by author id
-  const articlesList = await ArticleModel.find({ author: authorIdOfToken });
+  //get articles from author id
+  const articlesList = await articleModel.find({ author: authorIdOfToken });
+  if (!articlesList) {
+    return res.status(404).json({ message: "Articles not found" });
+  }
   //send res
-  res.status(200).json({ message: "articles", payload: articlesList });
+  res.status(200).json({ message: "Articles", payload: articlesList });
 });
 
-//Edit article
+//Edit Articles
 authorApp.put("/articles", verifyToken("AUTHOR"), async (req, res) => {
   //get author id from decoded token
   const authorIdOfToken = req.user?.id;
-  //get modified article from client
-  const { articleId, title, category, content } = req.body; // {artcileId,title,category,content}
-  const modifiedArticle = await ArticleModel.findOneAndUpdate(
+  //get the updatedArticle from the req
+  const { articleId, title, category, content } = req.body;
+  //find and update the article from article db
+  const modifiedArticle = await articleModel.findOneAndUpdate(
     { _id: articleId, author: authorIdOfToken },
     { $set: { title, category, content } },
     { new: true },
   );
-
-  //if either artcile id or author not correct
   if (!modifiedArticle) {
-    return res.status(403).json({ message: "Not authorized to edit artcile" });
+    return res
+      .status(403)
+      .json({ message: "You are not authorized to edit this article" });
   }
-  //send res
-  res.status(200).json({ message: "Article modified", payload: modifiedArticle });
+  res
+    .status(200)
+    .json({ message: "updated the article", payload: modifiedArticle });
 });
-
-//Delete article(soft delete)
+//Delete Articles(Soft delete)
 authorApp.patch("/articles", verifyToken("AUTHOR"), async (req, res) => {
-  //get author id from decoded token
+  //get user id from decodedToken
   const authorIdOfToken = req.user?.id;
-  //get modified article from client
+  //get body from request
   const { articleId, isArticleActive } = req.body;
   //get article by id
-  const articleOfDB = await ArticleModel.findOne({ _id: articleId, author: authorIdOfToken });
-  //check status
-  if (isArticleActive === articleOfDB.isArticleActive) {
-    return res.status(200).json({ message: "Article already in the same state" });
+  const articleOfDB = await articleModel.findOne({
+    _id: articleId,
+    author: authorIdOfToken,
+  });
+  //chech status
+  if (isArticleActive === articleOfDB.isActive) {
+    return res
+      .status(200)
+      .json({ message: "Article already in the same state" });
   }
-
-  articleOfDB.isArticleActive = isArticleActive;
+  articleOfDB.isActive = isArticleActive;
   await articleOfDB.save();
-  //SEND RES
-  res.status(200).json({ message: "Artcile modified", payload: articleOfDB });
+  //send res
+  res.status(200).json({ message: "Article Modified", payload: articleOfDB });
 });

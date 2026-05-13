@@ -1,89 +1,119 @@
-import { createBrowserRouter, RouterProvider } from "react-router";
-import RootLayout from "./components/RootLayout";
-import Home from "./components/Home";
-import Register from "./components/Register";
-import Login from "./components/Login";
-import UserProfile from "./components/UserProfile";
-import AuthorProfile from "./components/AuthorProfile";
-import AuthorArticles from "./components/AuthorArticles";
-import EditArticle from "./components/EditArticle";
-import WriteArticles from "./components/WriteArticles";
-import ArticleByID from "./components/ArticleById";
-import { Toaster } from "react-hot-toast";
-import Unauthorized from "./components/Unauthorized";
-import ProtectedRoute from "./components/ProtectedRoute";
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router'
+import Root from '../src/components/Root'
+import Home from '../src/components/Home'
+import Register from '../src/components/Register'
+import Login from '../src/components/Login'
+import UserProfile from '../src/components/UserProfile'
+import AuthorProfile from '../src/components/AuthorProfile'
+import AdminProfile from '../src/components/AdminProfile'
+import Articles from '../src/components/Articles'
+import ArticleById from '../src/components/ArticleById'
+import WriteArticles from '../src/components/WriteArticles'
+import AuthorArticles from '../src/components/AuthorArticles'
+import UserList from '../src/components/UserList'
+import AuthorList from '../src/components/AuthorList'
+import EditArticle from '../src/components/EditArticle'
+import { Toaster } from 'react-hot-toast'
+import Unauthorized from '../src/components/Unauthorized'
+import ProtectedRoute from '../src/components/ProtectedRoute'
 
 function App() {
   const routerObj = createBrowserRouter([
     {
-      path: "/",
-      element: <RootLayout />,
+      path: '/',
+      element: <Root />,
       children: [
         {
-          path: "",
-          element: <Home />,
+          path: '',
+          element: <Home />
         },
         {
-          path: "register",
-          element: <Register />,
+          path: 'register',
+          element: <Register />
         },
         {
-          path: "login",
-          element: <Login />,
+          path: 'login',
+          element: <Login />
         },
         {
-          path: "user-profile",
+          path: 'user-profile',
           element: (
-            <ProtectedRoute allowedRoles={["USER"]}>
+            <ProtectedRoute allowedRoles={['USER']}>
               <UserProfile />
             </ProtectedRoute>
-          ),
+          )
         },
         {
-          path: "author-profile",
+          path: 'articles',
+          element: <Articles />
+        },
+        {
+          path: 'author-profile',
           element: (
-            <ProtectedRoute allowedRoles={["AUTHOR"]}>
+            <ProtectedRoute allowedRoles={['AUTHOR']}>
               <AuthorProfile />
             </ProtectedRoute>
           ),
-
           children: [
             {
               index: true,
-              element: <AuthorArticles />,
+              element: <AuthorArticles />
             },
             {
-              path: "articles",
-              element: <AuthorArticles />,
+              path: 'articles',
+              element: <AuthorArticles />
             },
             {
-              path: "write-article",
-              element: <WriteArticles />,
+              path: 'write-article',
+              element: <WriteArticles />
+            }
+          ]
+        },
+        {
+          path: 'admin-profile',
+          element: (
+            <ProtectedRoute allowedRoles={['ADMIN']}>
+              <AdminProfile />
+            </ProtectedRoute>
+          ),
+          children: [
+            {
+              index: true,
+              element: <Navigate to="users" replace />
             },
-          ],
+            {
+              path: 'users',
+              element: <UserList />
+            },
+            {
+              path: 'authors',
+              element: <AuthorList />
+            },
+            { path: 'articles', element: <Articles /> }
+          ]
         },
         {
-          path: "article/:id",
-          element: <ArticleByID />,
+          path: 'article/:id',
+          element: <ArticleById />
         },
         {
-          path: "edit-article",
-          element: <EditArticle />,
+          path: 'edit-article',
+          element: <EditArticle />
         },
         {
-          path: "unauthorized",
-          element: <Unauthorized />,
-        },
-      ],
-    },
-  ]);
+          path: 'unauthorized',
+          element: <Unauthorized />
+        }
+      ]
+    }
+  ])
 
   return (
     <div>
       <Toaster position="top-center" reverseOrder={false} />
       <RouterProvider router={routerObj} />
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

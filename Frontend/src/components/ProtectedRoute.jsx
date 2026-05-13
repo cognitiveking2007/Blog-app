@@ -1,29 +1,30 @@
-import { useAuth } from "../store/authStore";
-import { Navigate } from "react-router";
-import {toast} from "react-hot-toast";
+import { useAuth } from '../store/authStore'
+import { Navigate } from 'react-router'
+import { useEffect } from 'react'
+import toast from 'react-hot-toast'
 
 function ProtectedRoute({ children, allowedRoles }) {
-  //get user login status from store
-  const { loading, currentUser, isAuthenticated} = useAuth();
-  //loading state
+  const { loading, currentUser, isAuthenticated } = useAuth()
+
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      toast.error('Please login first')
+    }
+  }, [loading, isAuthenticated])
+
   if (loading) {
-    return <p>Loading...</p>;
+    return <p>Loading...</p>
   }
-  //if user not loggedin
+
   if (!isAuthenticated) {
-    toast.error("Redirecting to Login")
-    //redirect to Login
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace />
   }
 
-  //check roles
   if (allowedRoles && !allowedRoles.includes(currentUser?.role)) {
-   
-    //redirect to Login
-    return <Navigate to="/unauthorized" replace state={{ redirectTo: "/" }} />;
+    return <Navigate to="/unauthorized" replace state={{ redirectTo: '/' }} />
   }
 
-  return children;
+  return children
 }
 
-export default ProtectedRoute;
+export default ProtectedRoute
