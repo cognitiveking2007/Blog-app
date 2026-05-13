@@ -10,7 +10,7 @@ import cors from 'cors'
 
 const app = exp()
 
-/*app.use(
+app.use(
   cors({
     origin: function (origin, callback) {
       const allowedOrigins = [
@@ -28,8 +28,8 @@ const app = exp()
     },
     credentials: true
   })
-)*/
- app.use(
+)
+ /*app.use(
   cors({
      origin: [
       'http://localhost:5173',
@@ -38,7 +38,7 @@ const app = exp()
     ],
     credentials: true
   })
- )
+ )*/
 
 //add cookie parser middleware
 app.use(cookieParser())
