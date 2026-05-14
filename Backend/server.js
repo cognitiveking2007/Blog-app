@@ -55,9 +55,8 @@ app.use('/auth', commonApp)
 //Connect to DB
 const connectDB = async () => {
   try {
-    console.log("Actual DB_URL =", process.env.DB_URL)
-    console.log("DB_URL exists:", !!process.env.DB_URL)
-    await connect(process.env.DB_URL, { family: 4 })
+    console.log("Actual MONGO_URL =", process.env.MONGO_URL)
+    await connect(process.env.MONGO_URL, { family: 4 })
     console.log('DB Connected')
     const port = process.env.PORT
     app.listen(port, () => console.log(`Server listening on ${port}`))
