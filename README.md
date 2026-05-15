@@ -8,7 +8,7 @@ The application integrates frontend and backend services along with MongoDB Atla
 
 ---
 
-### Assignment 1: Backend Architecture and API Setup
+###  Backend Architecture and API Setup
 
 Built the backend using Express.js and MongoDB.
 
@@ -53,7 +53,7 @@ Response Sent Back
 
 ---
 
-### Assignment 2: Authentication and Authorization
+###  Authentication and Authorization
 
 Implemented secure authentication system using JWT.
 
@@ -80,7 +80,7 @@ Middleware used:
 
 ---
 
-### Assignment 3: Frontend Development using React
+###  Frontend Development using React
 
 Built frontend using React + Vite.
 
@@ -114,7 +114,7 @@ Protected Routes
 
 ---
 
-### Assignment 4: Article Management System
+###  Article Management System
 
 Implemented complete article management.
 
@@ -139,7 +139,7 @@ Display to Users
 
 ---
 
-### Assignment 5: Image Upload and Cloudinary Integration
+###  Image Upload and Cloudinary Integration
 
 Integrated Cloudinary for image uploads.
 
@@ -158,7 +158,7 @@ Configuration files:
 
 ---
 
-### Assignment 6: State Management and API Integration
+###  State Management and API Integration
 
 Used Zustand and Axios for handling application state and backend communication.
 
@@ -186,7 +186,7 @@ UI Updated
 
 ---
 
-### Assignment 7: Deployment
+###  Deployment
 
 Frontend deployed on Vercel:
 
